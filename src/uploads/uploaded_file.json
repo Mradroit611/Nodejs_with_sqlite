@@ -1,0 +1,26 @@
+----------------------------083764193463159356017796
+Content-Disposition: form-data; name="file"; filename="task.json"
+Content-Type: application/json
+
+[
+    {   
+        "id": 101,
+        "title": "Task 1",
+        "description": "This is the first task.",
+        "completed": false
+    },
+    {
+        "id": 102,
+        "title": "Task 2",
+        "description": "This is the second task.",
+        "completed": true
+    },
+    {
+        "id": 103,
+        "title": "Task 3",
+        "description": "This is the third task.",
+        "completed": false
+    }
+]
+
+----------------------------083764193463159356017796--
