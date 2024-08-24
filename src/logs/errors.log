@@ -1,0 +1,63 @@
+2024-08-23T18:08:28.820Z - GET /test-error
+Status: 500
+Message: This is a test error to check the error logging.
+Stack: Error: This is a test error to check the error logging.
+    at C:\Intern_Program\Nodejs\Task\src\server.ts:73:15
+    at Layer.handle [as handle_request] (C:\Intern_Program\Nodejs\Task\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Intern_Program\Nodejs\Task\node_modules\express\lib\router\route.js:149:13)
+    at Route.dispatch (C:\Intern_Program\Nodejs\Task\node_modules\express\lib\router\route.js:119:3)
+    at Layer.handle [as handle_request] (C:\Intern_Program\Nodejs\Task\node_modules\express\lib\router\layer.js:95:5)
+    at C:\Intern_Program\Nodejs\Task\node_modules\express\lib\router\index.js:284:15
+    at Function.process_params (C:\Intern_Program\Nodejs\Task\node_modules\express\lib\router\index.js:346:12)
+    at next (C:\Intern_Program\Nodejs\Task\node_modules\express\lib\router\index.js:280:10)
+    at jsonParser (C:\Intern_Program\Nodejs\Task\node_modules\body-parser\lib\types\json.js:122:7)
+    at Layer.handle [as handle_request] (C:\Intern_Program\Nodejs\Task\node_modules\express\lib\router\layer.js:95:5)
+
+2024-08-23T18:23:13.544Z - POST /tasks
+Status: 500
+Message: SQLITE_CONSTRAINT: NOT NULL constraint failed: task.title
+Stack: QueryFailedError: SQLITE_CONSTRAINT: NOT NULL constraint failed: task.title
+    at Statement.handler (C:\Intern_Program\Nodejs\Task\node_modules\typeorm\src\driver\sqlite\SqliteQueryRunner.ts:135:29)
+
+2024-08-23T18:23:51.049Z - POST /tasks
+Status: 500
+Message: SQLITE_CONSTRAINT: NOT NULL constraint failed: task.title
+Stack: QueryFailedError: SQLITE_CONSTRAINT: NOT NULL constraint failed: task.title
+    at Statement.handler (C:\Intern_Program\Nodejs\Task\node_modules\typeorm\src\driver\sqlite\SqliteQueryRunner.ts:135:29)
+
+2024-08-23T18:27:03.591Z - POST /tasks
+Status: 500
+Message: SQLITE_CONSTRAINT: NOT NULL constraint failed: task.title
+Stack: QueryFailedError: SQLITE_CONSTRAINT: NOT NULL constraint failed: task.title
+    at Statement.handler (C:\Intern_Program\Nodejs\Task\node_modules\typeorm\src\driver\sqlite\SqliteQueryRunner.ts:135:29)
+
+2024-08-23T18:30:56.280Z - POST /tasks
+Status: 500
+Message: SQLITE_CONSTRAINT: UNIQUE constraint failed: task.id
+Stack: QueryFailedError: SQLITE_CONSTRAINT: UNIQUE constraint failed: task.id
+    at Statement.handler (C:\Intern_Program\Nodejs\Task\node_modules\typeorm\src\driver\sqlite\SqliteQueryRunner.ts:135:29)
+
+2024-08-23T18:34:47.545Z - POST /tasks
+Status: 500
+Message: SQLITE_CONSTRAINT: UNIQUE constraint failed: task.id
+Stack: QueryFailedError: SQLITE_CONSTRAINT: UNIQUE constraint failed: task.id
+    at Statement.handler (C:\Intern_Program\Nodejs\Task\node_modules\typeorm\src\driver\sqlite\SqliteQueryRunner.ts:135:29)
+
+2024-08-23T18:37:39.033Z - POST /tasks
+Status: 500
+Message: SQLITE_CONSTRAINT: UNIQUE constraint failed: task.id
+Stack: QueryFailedError: SQLITE_CONSTRAINT: UNIQUE constraint failed: task.id
+    at Statement.handler (C:\Intern_Program\Nodejs\Task\node_modules\typeorm\src\driver\sqlite\SqliteQueryRunner.ts:135:29)
+
+2024-08-23T18:37:47.094Z - POST /tasks
+Status: 500
+Message: SQLITE_CONSTRAINT: UNIQUE constraint failed: task.id
+Stack: QueryFailedError: SQLITE_CONSTRAINT: UNIQUE constraint failed: task.id
+    at Statement.handler (C:\Intern_Program\Nodejs\Task\node_modules\typeorm\src\driver\sqlite\SqliteQueryRunner.ts:135:29)
+
+2024-08-23T18:41:50.981Z - POST /tasks
+Status: 500
+Message: SQLITE_CONSTRAINT: UNIQUE constraint failed: task.id
+Stack: QueryFailedError: SQLITE_CONSTRAINT: UNIQUE constraint failed: task.id
+    at Statement.handler (C:\Intern_Program\Nodejs\Task\node_modules\typeorm\src\driver\sqlite\SqliteQueryRunner.ts:135:29)
+

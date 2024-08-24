@@ -1,11 +1,13 @@
-import express, { Request, Response } from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 import { createConnection, Repository } from 'typeorm';
 import { Task } from './entity/Task';
 import path from 'path';
 import fs from 'fs';
 import multer from 'multer';
 import { EventEmitter } from 'events';
-import { requestLogger, errorHandler } from './middleware';
+import morgan from 'morgan';
+import { format } from 'date-fns';
+import { errorHandler } from './middleware'; // Import the errorHandler
 
 const upload = multer({
     dest: path.join(__dirname, 'uploads'), // Temporary storage directory
@@ -19,33 +21,56 @@ export const fileProcessor = new FileProcessor();
 const app = express();
 const port = 3000;
 
-app.use(express.json());
-app.use(requestLogger);
+// Configure Morgan to log requests to a file
+const logsDir = path.join(__dirname, 'logs');
+if (!fs.existsSync(logsDir)) {
+    fs.mkdirSync(logsDir);
+}
 
+const requestLogFilePath = path.join(logsDir, 'requests.log');
+const requestLogStream = fs.createWriteStream(requestLogFilePath, { flags: 'a' });
+
+// Define a custom token for readable formatted time
+morgan.token('readable-date', () => {
+    return format(new Date(), 'yyyy-MM-dd HH:mm:ss'); // Format date as "YYYY-MM-DD HH:MM:SS"
+});
+
+const customMorganFormat = 
+    ':readable-date - [URL: :url, Method: :method, HTTP Version: HTTP/:http-version, Status: :status, Response Length: :res[content-length] bytes, Response Time: :response-time ms, Remote Address: :remote-addr, Referrer: ":referrer", User Agent: ":user-agent"]';
+
+
+
+// app.use(morgan('combined', { stream: requestLogStream })); // Use 'combined' format for detailed logs
+app.use(morgan(customMorganFormat, { stream: requestLogStream }));
+
+
+app.use(express.json());
+
+// Create the uploads directory if it does not exist
 const createDirectoryIfNotExists = (dir: string) => {
     if (!fs.existsSync(dir)) fs.mkdirSync(dir);
 };
-createDirectoryIfNotExists(path.join(__dirname, 'logs'));
 createDirectoryIfNotExists(path.join(__dirname, 'uploads'));
 
 // Connect to the database
 createConnection().then(connection => {
     const taskRepository: Repository<Task> = connection.getRepository(Task);
 
+    // Custom error handler for specific routes
     const handleError = (res: Response, statusCode: number, message: string) => {
         res.status(statusCode).json({ error: message });
     };
 
-    app.get('/tasks', async (req: Request, res: Response) => {
+    app.get('/tasks', async (req: Request, res: Response, next: NextFunction) => {
         try {
             const tasks = await taskRepository.find();
             res.json(tasks);
         } catch (error) {
-            handleError(res, 500, 'Failed to fetch tasks');
+            next(error); // Pass the error to the error-handling middleware
         }
     });
 
-    app.get('/task/:id', async (req: Request, res: Response) => {
+    app.get('/task/:id', async (req: Request, res: Response, next: NextFunction) => {
         try {
             const taskId: number = parseInt(req.params.id, 10);
             const task = await taskRepository.findOneBy({ id: taskId });
@@ -55,32 +80,43 @@ createConnection().then(connection => {
                 handleError(res, 404, 'Task not found');
             }
         } catch (error) {
-            handleError(res, 500, 'Failed to fetch task');
+            next(error); // Pass the error to the error-handling middleware
         }
     });
 
-    app.post('/tasks', async (req: Request, res: Response) => {
+
+    app.post('/tasks', async (req: Request, res: Response, next: NextFunction) => {
         try {
             const task = taskRepository.create(req.body);
             const result = await taskRepository.save(task);
             res.status(201).json(result);
         } catch (error) {
-            handleError(res, 500, 'Failed to create task');
+            next(error); // Pass the error to the error-handling middleware
         }
     });
 
-    app.put('/task/:id', async (req: Request, res: Response) => {
+    app.put('/task/:id', async (req: Request, res: Response, next: NextFunction) => {
         try {
             const id: number = parseInt(req.params.id, 10);
             const { title, description, completed } = req.body;
-            const result = await taskRepository.upsert([{ id, title, description, completed }], { conflictPaths: ['id'] });
-            res.status(201).json(result);
+            
+            // Check if the task with the provided ID exists
+            const existingTask = await taskRepository.findOneBy({ id });
+            if (!existingTask) {
+                return handleError(res, 404, 'Task not found');
+            }
+
+            // Update task without using ID as a default value
+            await taskRepository.update(id, { title, description, completed });
+            const updatedTask = await taskRepository.findOneBy({ id });
+
+            res.status(200).json(updatedTask);
         } catch (error) {
-            handleError(res, 500, 'Failed to update task');
+            next(error); // Pass the error to the error-handling middleware
         }
     });
 
-    app.delete('/task/:id', async (req: Request, res: Response) => {
+    app.delete('/task/:id', async (req: Request, res: Response, next: NextFunction) => {
         try {
             const id: number = parseInt(req.params.id, 10);
             const deleteResult = await taskRepository.delete(id);
@@ -90,24 +126,24 @@ createConnection().then(connection => {
                 handleError(res, 404, 'Task not found');
             }
         } catch (error) {
-            handleError(res, 500, 'Failed to delete task');
+            next(error); // Pass the error to the error-handling middleware
         }
     });
 
-    app.patch('/task/:id', async (req: Request, res: Response) => {
+    app.patch('/task/:id', async (req: Request, res: Response, next: NextFunction) => {
         try {
             const id = parseInt(req.params.id, 10);
             const updates = req.body;
             const result = await taskRepository.update(id, updates);
 
             if (result.affected) {
-                const updatedTask = await taskRepository.findOne({ where: { id } });
+                const updatedTask = await taskRepository.findOneBy({ id });
                 return res.status(200).json(updatedTask);
             } else {
                 return handleError(res, 404, 'Task not found');
             }
         } catch (error) {
-            return handleError(res, 500, 'Failed to update task');
+            next(error); // Pass the error to the error-handling middleware
         }
     });
 
@@ -149,6 +185,7 @@ createConnection().then(connection => {
         }
     });
 
+    // Use the error-handling middleware after all routes
     app.use(errorHandler);
 
     app.listen(port, () => {
